@@ -2,6 +2,8 @@
 Toxic Comment Classification using LSTM and CNNs
 
 
+
 ## Data
 - [link to dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data)
 - or `kaggle competitions download -c jigsaw-toxic-comment-classification-challenge`
+### Install data in directory at root level called "data"
