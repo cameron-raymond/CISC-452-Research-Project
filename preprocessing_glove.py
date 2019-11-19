@@ -41,9 +41,6 @@ def text_clean(text):
     return lemmatize(token_words)
 
 
-
-# TODO
-#   see if max_length is correct
 def return_data(path):
     """
     Returns the csv's comments and their associated labels
@@ -69,15 +66,10 @@ def return_data(path):
         for line in csv_reader:
             cleaned_text = " ".join(text_clean(line[1]))
             curr_length = len(text_clean(line[1]))
-            print(cleaned_text)
-            print(curr_length)
-            print("\n")
             docs.append(cleaned_text)
             labels.append(line[2:])
             if curr_length > max_length:
                 max_length = curr_length
-            if line_count == 1000:
-                break
             line_count += 1
         return docs, labels, max_length
 
