@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# glove models
+glove/
+# saved modesl
+saved_models/
 # C extensions
 *.so
 

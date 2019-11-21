@@ -1,7 +1,9 @@
 import numpy as np
 import csv
+import os.path
 import pandas as pd
 import nltk
+import h5py # for saving models to file
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem import WordNetLemmatizer 
 from nltk.corpus import stopwords
@@ -14,6 +16,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Embedding
+from tensorflow.keras.models import load_model
 
 
 # How many words to consider
@@ -43,7 +46,7 @@ def text_clean(text):
 
 
 
-def return_data(path):
+def return_data(path,num_to_take=None):
     """
     Reads in a csv turns the csv's comments as a data frame along with the largest length 
 
@@ -51,6 +54,9 @@ def return_data(path):
     ----------
     path : str
         String path to the csv containing the training or test data
+
+    num_to_take : None | int
+        If num_to_take is None then return the entire data set, otherwise return the number of rows equal to num_to_take
 
     Returns
     -------
@@ -62,8 +68,8 @@ def return_data(path):
     """
 
     list_len = lambda p : len(p.split())
-    print("--- reading in CSV ---")
-    text_df = pd.read_csv(path)
+    print("--- reading in first {} from CSV ---".format(num_to_take)) if num_to_take else print("--- reading in CSV ---")
+    text_df = pd.read_csv(path).head(num_to_take) if num_to_take else pd.read_csv(path)
     text_df["cleaned_text"] = text_df["cleaned_text"].astype(str)
     max_len = max(text_df['cleaned_text'].apply(list_len))
 
@@ -79,7 +85,7 @@ def clean_all_data(path):
         String path to the csv containing the training or test data
     """
     print("--- reading in CSV ---")
-    text_df = pd.read_csv(path) 
+    text_df = pd.read_csv(path)
     print("--- cleaning ---")
     text_df['cleaned_text'] = text_df['comment_text'].apply(text_clean)
     text_df.to_csv('./data/cleaned_text.csv', encoding='utf-8')
@@ -130,13 +136,47 @@ def generate_glove_weights(embeddings, tokenizer):
             embedding_matrix[i] = embedding_vector
     return np.array(embedding_matrix)
 
+def load_h5_model(name):
+    """
+    Loads in a model saved with the HDF5 binary data format.
 
-def testing():
+    Parameters
+    ----------
+    name : str
+        The name of the HDF5 model. Checks if the model exists within the saved_models directory.
 
+    Returns
+    -------
+    model : tensorflow model | None
+    """
+    file_path = './saved_models/{}.h5'.format(name)
+    if os.path.exists(file_path):
+        return load_model(file_path)
+    return None
 
-    text_df, max_length = return_data('./data/cleaned_train.csv')
+def save_h5_model(model,name="model"):
+    """
+    Saves in a model to the HDF5 binary data format.
 
+    Parameters
+    ----------
+    model : tensorflow model 
+        The Tensorflow model to be saved
 
+    name : str
+        The name of the HDF5 model. Checks if the model exists within the saved_models directory.
+    """
+    file_path = './saved_models/{}.h5'.format(name)
+    if not os.path.exists(os.path.dirname(file_path)):
+        try:
+            os.makedirs(os.path.dirname(file_path))
+            model.save(file_path)
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+if __name__ == "__main__":
+    text_df, max_length = return_data('./data/cleaned_train.csv',80)
     labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
     x_train = text_df['cleaned_text']
     x_labels = np.array(text_df.loc[:][labels])
@@ -160,6 +200,7 @@ def testing():
     VOCAB_SIZE = len(t.word_index) + 1
     print("Training model...")
     # Define the model
+    model_name = "glove_embedding_NN"
     model = Sequential()
     e = Embedding(VOCAB_SIZE, 100, weights=[embedding_matrix], input_length=max_length, trainable=False)
     model.add(e)
@@ -170,9 +211,16 @@ def testing():
     # summarize the model
     print(model.summary())
     # fit the model
-    model.fit(x_train, x_labels, epochs=10, verbose=0)
+    model.fit(x_train, x_labels, epochs=10, verbose=1)
     # evaluate the model
     loss, accuracy = model.evaluate(x_train, x_labels, verbose=0)
-    print('Accuracy: %f' % (accuracy*100))
+    print('Accuracy: {:.3f}'.format(accuracy*100))
+    print("Saving model to file...")
+    save_h5_model(model,model_name)
+    del model
+    print("Loading model...")
+    model = load_h5_model(model_name)
+    loss, accuracy = model.evaluate(x_train, x_labels, verbose=0)
+    print('Accuracy: {:.3f}'.format(accuracy*100))
 
-testing()
+
