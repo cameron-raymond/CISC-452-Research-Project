@@ -128,17 +128,20 @@ def generate_glove_weights(embeddings, tokenizer):
         embedding_vector = embeddings.get(word)
         if embedding_vector is not None:
             embedding_matrix[i] = embedding_vector
-    return embedding_matrix
+    return np.array(embedding_matrix)
 
 
 def testing():
+
+
     text_df, max_length = return_data('./data/cleaned_train.csv')
 
 
     labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
     x_train = text_df['cleaned_text']
-    x_labels = text_df.loc[:][labels]
-
+    x_labels = np.array(text_df.loc[:][labels])
+    print("Type of train: ", type(x_train))
+    print("Type of labels: ", type(x_labels))
     print("Loading glove embeddings")
     embeddings = load_glove('./glove/glove.6B.100d.txt')
     print("Done. Now fitting vocab...")
@@ -155,7 +158,7 @@ def testing():
 
 
     VOCAB_SIZE = len(t.word_index) + 1
-
+    print("Training model...")
     # Define the model
     model = Sequential()
     e = Embedding(VOCAB_SIZE, 100, weights=[embedding_matrix], input_length=max_length, trainable=False)
