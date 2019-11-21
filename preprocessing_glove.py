@@ -129,7 +129,6 @@ def generate_glove_weights(embeddings, tokenizer):
         embedding_vector = embeddings.get(word)
         if embedding_vector is not None:
             embedding_matrix[i] = embedding_vector
-    np.save('./data/embedding_matrix.npy', embedding_matrix)
-    print('--- Saved embedding matrix ---')
+    return embedding_matrix
 
 

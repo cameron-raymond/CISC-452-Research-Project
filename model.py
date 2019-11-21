@@ -54,7 +54,9 @@ def main():
     x_train = np.array(text_df['cleaned_text'])
     x_labels = np.array(text_df.loc[:][labels])
     
-    embedding_matrix= np.load('./data/embedding_matrix.npy')
+    print("--- Loading embeddings ---")
+    embeddings = preproc.load_glove('./glove/glove.6B.100d.txt')
+    print("--- Done Loading Embeddings. Now Fitting Vocab ---")
 
     t = Tokenizer(filters = '"#$%&()*+-/:;<=>@[\]^_`{|}~')
     # generate a vocabulary based on frequency based on the texts
@@ -63,6 +65,8 @@ def main():
     # Generates a matrix where each row is a document
     x_train = t.texts_to_sequences(x_train)
     x_train = pad_sequences(x_train, maxlen=max_length, padding='post')
+    embedding_matrix = preproc.generate_glove_weights(embeddings, t)
+
 
 
     VOCAB_SIZE = embedding_matrix.shape[0]
