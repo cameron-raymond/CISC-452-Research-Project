@@ -19,9 +19,6 @@ from tensorflow.keras.layers import Dense, Flatten, Embedding
 from tensorflow.keras.models import load_model
 
 
-# How many words to consider
-VOCAB_SIZE = 5000
-
 def text_clean(text):
     """
     Gets and prints the spreadsheet's header columns
@@ -69,7 +66,7 @@ def return_data(path,num_to_take=None):
 
     list_len = lambda p : len(p.split())
     print("--- reading in first {} from CSV ---".format(num_to_take)) if num_to_take else print("--- reading in CSV ---")
-    text_df = pd.read_csv(path).head(num_to_take) if num_to_take else pd.read_csv(path)
+    text_df = pd.read_csv(path, nrows=num_to_take) if num_to_take else pd.read_csv(path)
     text_df["cleaned_text"] = text_df["cleaned_text"].astype(str)
     max_len = max(text_df['cleaned_text'].apply(list_len))
 
@@ -77,7 +74,7 @@ def return_data(path,num_to_take=None):
 
 def clean_all_data(path):
     """
-    takes in a csv file and cleans all the comment_text column
+    takes in a csv file and cleans all the comment_text column. This is only used to clean the train.csv and test.csv
 
     Parameters
     ----------
@@ -116,15 +113,13 @@ def load_glove(path):
     f.close()
     return embeddings_index
 
-
-
 def generate_glove_weights(embeddings, tokenizer):
     """
-    generates a weight matrix to be input in an embedding layer in keras
+    generates a weight matrix. It is then saved as a binary numpy file that can be loaded
 
-    Returns
-    -------
-    embeddings_matrix : np.array
+    Generates
+    ---------
+    embedding_matrix.npy : np.array
         A numpy array of dimensions vocab_size x vector_representation_dim. Each row represents a word that appears
         during in a document and the vectors can be thought of as the weights being used in training.
     """
@@ -134,93 +129,7 @@ def generate_glove_weights(embeddings, tokenizer):
         embedding_vector = embeddings.get(word)
         if embedding_vector is not None:
             embedding_matrix[i] = embedding_vector
-    return np.array(embedding_matrix)
-
-def load_h5_model(name):
-    """
-    Loads in a model saved with the HDF5 binary data format.
-
-    Parameters
-    ----------
-    name : str
-        The name of the HDF5 model. Checks if the model exists within the saved_models directory.
-
-    Returns
-    -------
-    model : tensorflow model | None
-    """
-    file_path = './saved_models/{}.h5'.format(name)
-    if os.path.exists(file_path):
-        return load_model(file_path)
-    return None
-
-def save_h5_model(model,name="model"):
-    """
-    Saves in a model to the HDF5 binary data format.
-
-    Parameters
-    ----------
-    model : tensorflow model 
-        The Tensorflow model to be saved
-
-    name : str
-        The name of the HDF5 model. Checks if the model exists within the saved_models directory.
-    """
-    file_path = './saved_models/{}.h5'.format(name)
-    if not os.path.exists(os.path.dirname(file_path)):
-        try:
-            os.makedirs(os.path.dirname(file_path))
-            model.save(file_path)
-        except OSError as exc: # Guard against race condition
-            if exc.errno != errno.EEXIST:
-                raise
-
-if __name__ == "__main__":
-    text_df, max_length = return_data('./data/cleaned_train.csv',80)
-    labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
-    x_train = text_df['cleaned_text']
-    x_labels = np.array(text_df.loc[:][labels])
-    print("Type of train: ", type(x_train))
-    print("Type of labels: ", type(x_labels))
-    print("Loading glove embeddings")
-    embeddings = load_glove('./glove/glove.6B.100d.txt')
-    print("Done. Now fitting vocab...")
- 
-
-    t = Tokenizer(filters = '"#$%&()*+-/:;<=>@[\]^_`{|}~')
-    # generate a vocabulary based on frequency based on the texts
-    t.fit_on_texts(x_train)
-
-    # Generates a matrix where each row is a document
-    x_train = t.texts_to_sequences(x_train)
-    x_train = pad_sequences(x_train, maxlen=max_length, padding='post')
-    embedding_matrix = generate_glove_weights(embeddings, t)
-
-
-    VOCAB_SIZE = len(t.word_index) + 1
-    print("Training model...")
-    # Define the model
-    model_name = "glove_embedding_NN"
-    model = Sequential()
-    e = Embedding(VOCAB_SIZE, 100, weights=[embedding_matrix], input_length=max_length, trainable=False)
-    model.add(e)
-    model.add(Flatten())
-    model.add(Dense(6, activation='sigmoid'))
-    # compile the model
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-    # summarize the model
-    print(model.summary())
-    # fit the model
-    model.fit(x_train, x_labels, epochs=10, verbose=1)
-    # evaluate the model
-    loss, accuracy = model.evaluate(x_train, x_labels, verbose=0)
-    print('Accuracy: {:.3f}'.format(accuracy*100))
-    print("Saving model to file...")
-    save_h5_model(model,model_name)
-    del model
-    print("Loading model...")
-    model = load_h5_model(model_name)
-    loss, accuracy = model.evaluate(x_train, x_labels, verbose=0)
-    print('Accuracy: {:.3f}'.format(accuracy*100))
+    np.save('./data/embedding_matrix.npy', embedding_matrix)
+    print('--- Saved embedding matrix ---')
 
 
