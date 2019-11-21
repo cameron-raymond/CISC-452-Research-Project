@@ -99,46 +99,6 @@ class Preprocessor(object):
             print("--- loading glove weights ---")
             return np.load('../data/{}.npy'.format(glove_model))
 
-    def load_model(self,name):
-        """
-        Loads in a model saved with the HDF5 binary data format.
-
-        Parameters
-        ----------
-        name : str
-            The name of the HDF5 model. Checks if the model exists within the saved_models directory.
-
-        Returns
-        -------
-        model : tensorflow model | None
-        """
-        file_path = '../saved_models/{}.h5'.format(name)
-        if os.path.exists(file_path):
-            return load_model(file_path)
-        return None
-
-    def save_model(self,name="model"):
-        """
-        Saves in a model to the HDF5 binary data format.
-
-        Parameters
-        ----------
-        name : str
-            The name of the HDF5 model. Checks if the model exists within the saved_models directory.
-        """
-        file_path = '../saved_models/{}.h5'.format(name)
-        print("model => {}".format(file_path))
-
-        if not os.path.exists(os.path.dirname(file_path)):
-            try:
-                os.makedirs(os.path.dirname(file_path))
-                self.to_dense.save(file_path)
-            except OSError as exc: # Guard against race condition
-                if exc.errno != errno.EEXIST:
-                    raise
-        else:
-            self.to_dense.save(file_path)
-
 
 
 

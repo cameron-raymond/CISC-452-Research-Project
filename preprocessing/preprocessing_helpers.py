@@ -1,4 +1,5 @@
 import numpy as np
+import os.path
 import csv
 import pandas as pd
 import nltk
@@ -41,7 +42,7 @@ def text_clean(text):
 
 
 
-def return_data(path,num_to_take=None):
+def return_data(path,num_to_take=None,clean=False,write=False):
     """
     Reads in a csv turns the csv's comments as a data frame along with the largest length 
 
@@ -65,9 +66,10 @@ def return_data(path,num_to_take=None):
     list_len = lambda p : len(p.split())
     print("--- reading in first {} from CSV ---".format(num_to_take)) if num_to_take else print("--- reading in CSV ---")
     text_df = pd.read_csv(path, nrows=num_to_take) if num_to_take else pd.read_csv(path)
+    if clean:
+        text_df["cleaned_text"] = text_df["comment_text"].apply(text_clean)
     text_df["cleaned_text"] = text_df["cleaned_text"].astype(str)
     max_len = max(text_df['cleaned_text'].apply(list_len))
-
     return text_df,max_len
 
 def clean_all_data(path):
@@ -111,7 +113,7 @@ def load_glove(path):
     f.close()
     return embeddings_index
 
-def generate_glove_weights(embeddings, tokenizer):
+def generate_glove_weights(embeddings, tokenizer,check_exists=False):
     """
     generates a weight matrix. It is then saved as a binary numpy file that can be loaded
 
@@ -121,8 +123,12 @@ def generate_glove_weights(embeddings, tokenizer):
         A numpy array of dimensions vocab_size x vector_representation_dim. Each row represents a word that appears
         during in a document and the vectors can be thought of as the weights being used in training.
     """
+    if os.path.exists("../data/embedding_matrix.npy") and check_exists:
+        print("--- loading GloVe weights ---")
+        return np.load("../data/embedding_matrix.npy")
+    print("--- generating GloVe weights ---")
     VOCAB_SIZE = len(tokenizer.word_index) + 1
-    embedding_matrix = np.zeros((VOCAB_SIZE, 100))
+    embedding_matrix = np.zeros((VOCAB_SIZE,100))
     for word, i in tokenizer.word_index.items():
         embedding_vector = embeddings.get(word)
         if embedding_vector is not None:
@@ -131,4 +137,43 @@ def generate_glove_weights(embeddings, tokenizer):
     print('--- Saved embedding matrix ---')
     return embedding_matrix
 
+def load_model(self,name):
+    """
+    Loads in a model saved with the HDF5 binary data format.
+
+    Parameters
+    ----------
+    name : str
+        The name of the HDF5 model. Checks if the model exists within the saved_models directory.
+
+    Returns
+    -------
+    model : tensorflow model | None
+    """
+    file_path = '../saved_models/{}.h5'.format(name)
+    if os.path.exists(file_path):
+        return load_model(file_path)
+    return None
+
+def save_model(self,name="model"):
+    """
+    Saves in a model to the HDF5 binary data format.
+
+    Parameters
+    ----------
+    name : str
+        The name of the HDF5 model. Checks if the model exists within the saved_models directory.
+    """
+    file_path = '../saved_models/{}.h5'.format(name)
+    print("model => {}".format(file_path))
+    
+    if not os.path.exists(os.path.dirname(file_path)):
+        try:
+            os.makedirs(os.path.dirname(file_path))
+            self.to_dense.save(file_path)
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+    else:
+        self.to_dense.save(file_path)
 
