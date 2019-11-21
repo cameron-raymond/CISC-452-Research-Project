@@ -1,6 +1,5 @@
 import numpy as np
 import csv
-import os.path
 import pandas as pd
 import nltk
 import h5py # for saving models to file
@@ -16,7 +15,6 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Embedding
-from tensorflow.keras.models import load_model
 
 
 def text_clean(text):
@@ -85,7 +83,7 @@ def clean_all_data(path):
     text_df = pd.read_csv(path)
     print("--- cleaning ---")
     text_df['cleaned_text'] = text_df['comment_text'].apply(text_clean)
-    text_df.to_csv('./data/cleaned_text.csv', encoding='utf-8')
+    text_df.to_csv('../data/cleaned_text.csv', encoding='utf-8')
     print("--- Cleaned all data! ---")
 
 
@@ -129,7 +127,8 @@ def generate_glove_weights(embeddings, tokenizer):
         embedding_vector = embeddings.get(word)
         if embedding_vector is not None:
             embedding_matrix[i] = embedding_vector
-    np.save('./data/embedding_matrix.npy', embedding_matrix)
+    np.save('../data/embedding_matrix.npy', embedding_matrix)
     print('--- Saved embedding matrix ---')
+    return embedding_matrix
 
 
