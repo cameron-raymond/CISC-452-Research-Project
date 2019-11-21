@@ -1,22 +1,23 @@
 import numpy as np
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import Sequential
 import csv
-
+import pandas as pd
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem import WordNetLemmatizer 
 from nltk.corpus import stopwords
 # nltk.download('wordnet')
 lemmatizer = WordNetLemmatizer()
-# from tensorflow.keras.layers import Dense, Flatten, Embedding
+
+
+
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, Embedding
+
 
 # How many words to consider
-VOCAB_SIZE = 1000000
-
-
-
+VOCAB_SIZE = 5000
 
 def text_clean(text):
     """
@@ -38,12 +39,13 @@ def text_clean(text):
                         
     text        = text.lower()
     token_words = word_tokenize(text)
-    return lemmatize(token_words)
+    return " ".join(lemmatize(token_words))
+
 
 
 def return_data(path):
     """
-    Returns the csv's comments and their associated labels
+    Reads in a csv turns the csv's comments as a data frame along with the largest length 
 
     Parameters
     ----------
@@ -52,26 +54,37 @@ def return_data(path):
 
     Returns
     -------
-    docs
-        a list of strings with each one being a comment from a different document
-    labels
-        a list of 0 or 1s that represent the label
+    text_df : pandas.DataFrame
+        a pandas DataFrame containing the entire document with cleaned text and labels.
+
+    max_len: int
+        an integer representing the number of words in the longest comment in the cleaned_text column
     """
-    with open(path, encoding="utf8") as csv_file:
-        csv_reader = csv.reader(csv_file)
-        docs = []
-        labels = []
-        line_count = 0
-        max_length = 0
-        for line in csv_reader:
-            cleaned_text = " ".join(text_clean(line[1]))
-            curr_length = len(text_clean(line[1]))
-            docs.append(cleaned_text)
-            labels.append(line[2:])
-            if curr_length > max_length:
-                max_length = curr_length
-            line_count += 1
-        return docs, labels, max_length
+
+    list_len = lambda p : len(p.split())
+    print("--- reading in CSV ---")
+    text_df = pd.read_csv(path)
+    text_df["cleaned_text"] = text_df["cleaned_text"].astype(str)
+    max_len = max(text_df['cleaned_text'].apply(list_len))
+
+    return text_df,max_len
+
+def clean_all_data(path):
+    """
+    takes in a csv file and cleans all the comment_text column
+
+    Parameters
+    ----------
+    path : str
+        String path to the csv containing the training or test data
+    """
+    print("--- reading in CSV ---")
+    text_df = pd.read_csv(path) 
+    print("--- cleaning ---")
+    text_df['cleaned_text'] = text_df['comment_text'].apply(text_clean)
+    text_df.to_csv('./data/cleaned_text.csv', encoding='utf-8')
+    print("--- Cleaned all data! ---")
+
 
 def load_glove(path):
     """
@@ -98,6 +111,7 @@ def load_glove(path):
     return embeddings_index
 
 
+
 def generate_glove_weights(embeddings, tokenizer):
     """
     generates a weight matrix to be input in an embedding layer in keras
@@ -108,6 +122,7 @@ def generate_glove_weights(embeddings, tokenizer):
         A numpy array of dimensions vocab_size x vector_representation_dim. Each row represents a word that appears
         during in a document and the vectors can be thought of as the weights being used in training.
     """
+    VOCAB_SIZE = len(tokenizer.word_index) + 1
     embedding_matrix = np.zeros((VOCAB_SIZE, 100))
     for word, i in tokenizer.word_index.items():
         embedding_vector = embeddings.get(word)
@@ -115,26 +130,46 @@ def generate_glove_weights(embeddings, tokenizer):
             embedding_matrix[i] = embedding_vector
     return embedding_matrix
 
-def main():
-    x_train, y_train, max_length = return_data('./data/train.csv')
+
+def testing():
+    text_df, max_length = return_data('./data/cleaned_train.csv')
+
+
+    labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
+    x_train = text_df['cleaned_text']
+    x_labels = text_df.loc[:][labels]
 
     print("Loading glove embeddings")
     embeddings = load_glove('./glove/glove.6B.100d.txt')
     print("Done. Now fitting vocab...")
+ 
 
-
-    t = Tokenizer(num_words = VOCAB_SIZE, filters = '"#$%&()*+-/:;<=>@[\]^_`{|}~')
+    t = Tokenizer(filters = '"#$%&()*+-/:;<=>@[\]^_`{|}~')
     # generate a vocabulary based on frequency based on the texts
     t.fit_on_texts(x_train)
 
     # Generates a matrix where each row is a document
     x_train = t.texts_to_sequences(x_train)
     x_train = pad_sequences(x_train, maxlen=max_length, padding='post')
-    glove_matrix = generate_glove_weights(embeddings, t)
-
-    print(glove_matrix[1])
-    print(glove_matrix[2])
-    print(max_length)
+    embedding_matrix = generate_glove_weights(embeddings, t)
 
 
-main()
+    VOCAB_SIZE = len(t.word_index) + 1
+
+    # Define the model
+    model = Sequential()
+    e = Embedding(VOCAB_SIZE, 100, weights=[embedding_matrix], input_length=max_length, trainable=False)
+    model.add(e)
+    model.add(Flatten())
+    model.add(Dense(6, activation='sigmoid'))
+    # compile the model
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    # summarize the model
+    print(model.summary())
+    # fit the model
+    model.fit(x_train, x_labels, epochs=10, verbose=0)
+    # evaluate the model
+    loss, accuracy = model.evaluate(x_train, x_labels, verbose=0)
+    print('Accuracy: %f' % (accuracy*100))
+
+testing()
