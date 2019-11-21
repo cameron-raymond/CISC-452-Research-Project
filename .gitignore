@@ -2,11 +2,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
-glove/
 
-# glove models
+# data
+data/
+# saved models
 glove/
-# saved modesl
 saved_models/
 # C extensions
 *.so
