@@ -154,6 +154,27 @@ def load_h5_model(name):
         return load_model(file_path)
     return None
 
+def save_h5_model(model,name="model"):
+    """
+    Saves in a model to the HDF5 binary data format.
+
+    Parameters
+    ----------
+    model : tensorflow model 
+        The Tensorflow model to be saved
+
+    name : str
+        The name of the HDF5 model. Checks if the model exists within the saved_models directory.
+    """
+    file_path = './saved_models/{}.h5'.format(name)
+    if not os.path.exists(os.path.dirname(file_path)):
+        try:
+            os.makedirs(os.path.dirname(file_path))
+            model.save(file_path)
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
 if __name__ == "__main__":
     text_df, max_length = return_data('./data/cleaned_train.csv',80)
     labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
@@ -195,7 +216,7 @@ if __name__ == "__main__":
     loss, accuracy = model.evaluate(x_train, x_labels, verbose=0)
     print('Accuracy: {:.3f}'.format(accuracy*100))
     print("Saving model to file...")
-    model.save('./saved_models/{}.h5'.format(model_name))
+    save_h5_model(model,model_name)
     del model
     print("Loading model...")
     model = load_h5_model(model_name)
