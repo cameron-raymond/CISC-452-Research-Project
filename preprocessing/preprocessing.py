@@ -9,7 +9,7 @@ from tensorflow.keras.models import load_model
 
 
 if __name__ == "__main__":
-    text_df, max_length   = preproc.return_data('../data/{}.csv'.format("train"),num_to_take=80,clean=True)
+    text_df, max_length   = preproc.return_data('data/{}.csv'.format("cleaned_train"))
     labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 
     train  = np.array(text_df['cleaned_text'])
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     x_train, x_test = train[mask], train[~mask] # split data into train test splits
     y_train, y_test = np.array(text_df[mask][labels]), np.array(text_df[~mask][labels])
     
-    glove_embeddings = preproc.load_glove('../glove/glove.6B.100d.txt')
+    glove_embeddings = preproc.load_glove('glove/glove.6B.100d.txt')
     embedding_matrix = preproc.generate_glove_weights(glove_embeddings,t,check_exists=False)
 
     print("--- Initializing Model ---")

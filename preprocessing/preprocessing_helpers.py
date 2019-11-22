@@ -1,5 +1,6 @@
 import numpy as np
 import os.path
+import os
 import csv
 import pandas as pd
 import nltk
@@ -7,16 +8,15 @@ import h5py # for saving models to file
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem import WordNetLemmatizer 
 from nltk.corpus import stopwords
-# nltk.download('wordnet')
-lemmatizer = WordNetLemmatizer()
-
-
-
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Embedding
+# nltk.download('wordnet')
+lemmatizer = WordNetLemmatizer()
 
+
+PATH_TO_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 def text_clean(text):
     """
@@ -40,9 +40,7 @@ def text_clean(text):
     token_words = word_tokenize(text)
     return " ".join(lemmatize(token_words))
 
-
-
-def return_data(path,num_to_take=None,clean=False,write=False):
+def return_data(path,num_to_take=None,clean=False,shuffle=True,write=False):
     """
     Reads in a csv turns the csv's comments as a data frame along with the largest length 
 
@@ -70,6 +68,8 @@ def return_data(path,num_to_take=None,clean=False,write=False):
         text_df["cleaned_text"] = text_df["comment_text"].apply(text_clean)
     text_df["cleaned_text"] = text_df["cleaned_text"].astype(str)
     max_len = max(text_df['cleaned_text'].apply(list_len))
+    if shuffle:
+        text_df.sample(1)
     return text_df,max_len
 
 def clean_all_data(path):
@@ -85,7 +85,7 @@ def clean_all_data(path):
     text_df = pd.read_csv(path)
     print("--- cleaning ---")
     text_df['cleaned_text'] = text_df['comment_text'].apply(text_clean)
-    text_df.to_csv('../data/cleaned_text.csv', encoding='utf-8')
+    text_df.to_csv('{}/data/cleaned_text.csv'.format(PATH_TO_ROOT), encoding='utf-8')
     print("--- Cleaned all data! ---")
 
 
@@ -125,7 +125,7 @@ def generate_glove_weights(embeddings, tokenizer,check_exists=False):
     """
     if os.path.exists("../data/embedding_matrix.npy") and check_exists:
         print("--- loading GloVe weights ---")
-        return np.load("../data/embedding_matrix.npy")
+        return np.load("{}/data/embedding_matrix.npy".format(PATH_TO_ROOT))
     print("--- generating GloVe weights ---")
     VOCAB_SIZE = len(tokenizer.word_index) + 1
     embedding_matrix = np.zeros((VOCAB_SIZE,100))
@@ -133,11 +133,12 @@ def generate_glove_weights(embeddings, tokenizer,check_exists=False):
         embedding_vector = embeddings.get(word)
         if embedding_vector is not None:
             embedding_matrix[i] = embedding_vector
-    np.save('../data/embedding_matrix.npy', embedding_matrix)
+
+    np.save("{}/data/embedding_matrix.npy".format(PATH_TO_ROOT), embedding_matrix)
     print('--- Saved embedding matrix ---')
     return embedding_matrix
 
-def load_model(self,name):
+def load_model(name):
     """
     Loads in a model saved with the HDF5 binary data format.
 
@@ -150,12 +151,12 @@ def load_model(self,name):
     -------
     model : tensorflow model | None
     """
-    file_path = '../saved_models/{}.h5'.format(name)
+    file_path = '{}/saved_models/{}.h5'.format(PATH_TO_ROOT,name)
     if os.path.exists(file_path):
         return load_model(file_path)
     return None
 
-def save_model(self,name="model"):
+def save_model(file_path,model):
     """
     Saves in a model to the HDF5 binary data format.
 
@@ -164,16 +165,15 @@ def save_model(self,name="model"):
     name : str
         The name of the HDF5 model. Checks if the model exists within the saved_models directory.
     """
-    file_path = '../saved_models/{}.h5'.format(name)
+    file_path = "{}/{}".format(PATH_TO_ROOT,file_path)
     print("model => {}".format(file_path))
-    
     if not os.path.exists(os.path.dirname(file_path)):
         try:
             os.makedirs(os.path.dirname(file_path))
-            self.to_dense.save(file_path)
+            model.save(file_path)
         except OSError as exc: # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
     else:
-        self.to_dense.save(file_path)
+        model.save(file_path)
 
