@@ -2,7 +2,7 @@
 Toxic Comment Classification using LSTM and CNNs
 
 ## Requirments
-- `TODO` update with requirments
+- `pip3 install -r requirements.txt`
 
 
 ## Data
