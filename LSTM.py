@@ -37,6 +37,28 @@ class Toxic_Comment_LSTM(object):
             print("--- no model found, initializing from scrach ---")
             return self.define_model(embedding_matrix,saved_model=None)
         return model
+    
+    # Deeper LSTM with additionaldense  layer
+    # def define_model(self,embedding_matrix,saved_model=None):
+    #     if saved_model is None:
+    #         print("--- Initializing Model ---")
+    #         VOCAB_SIZE = embedding_matrix.shape[0]
+    #         model = Sequential()
+    #         embedding_layer = Embedding(VOCAB_SIZE, 100, weights=[embedding_matrix], input_length=max_length, trainable=False)
+    #         model.add(embedding_layer)
+    #         model.add(SpatialDropout1D(0.2))
+    #         model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2))
+    #         model.add(Dense(80, activation='relu'))
+    #         model.add(Dropout(0.2))
+    #         model.add(Dense(6, activation='sigmoid'))
+    #         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    #         return model
+    #     print("--- Loading Model from {} ---".format(saved_model))
+    #     model = preproc.load_h5_model(saved_model)
+    #     if model is None: # If the filepath is wrong or the model hasn't actually been defined earlier
+    #         print("--- no model found, initializing from scrach ---")
+    #         return self.define_model(embedding_matrix,saved_model=None)
+    #     return model
   
     def train(self,x_train=None,y_train=None):
         x_train = self.x_train if x_train is None else x_train
