@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     # Train and/or validate model
     using_saved_model = False  # Change this to True to only evaluate model on test data
-    if using_saved+_model:
+    if using_saved_model:
         saved_dense = Dense_Toxic_Comment(x_test=x_test,y_test=y_test,saved_model="saved_models/dense_model.h5")
         saved_dense.validate()
     else:
