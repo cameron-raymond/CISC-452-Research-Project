@@ -29,11 +29,13 @@ class Toxic_Comment_LSTM(object):
             model = Sequential()
             embedding_layer = Embedding(VOCAB_SIZE, 100, weights=[embedding_matrix], input_length=max_length, trainable=False)
             model.add(embedding_layer)
-            model.add(LSTM(60, return_sequences=True,name='lstm_layer'))
-            model.add(GlobalMaxPool1D())
-            model.add(Dropout(0.1))
-            model.add(Dense(50, activation="relu"))
-            model.add(Dropout(0.1))
+            model.add(Flatten())
+            # model.add(LSTM(60, return_sequences=True,name='lstm_layer'))
+            # model.add(GlobalMaxPool1D())
+            model.add(Dense(32, activation="relu"))
+            model.add(Dropout(0.2))
+            model.add(Dense(16, activation="relu"))
+            model.add(Dropout(0.2))
             model.add(Dense(num_labels, activation="sigmoid"))
             model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
             return model
@@ -47,7 +49,7 @@ class Toxic_Comment_LSTM(object):
     def train(self,x_train=None,y_train=None):
         x_train = self.x_train if x_train is None else x_train
         y_train = self.y_train if y_train is None else y_train
-        epochs = 10
+        epochs = 5
         batch_size = 64
         callback = EarlyStopping(monitor='val_loss', patience=3, min_delta=0.0001,verbose=1)
         history = self.model.fit(x_train,y_train, epochs=epochs, batch_size=batch_size,validation_split=0.1,callbacks=[callback],verbose=1)
