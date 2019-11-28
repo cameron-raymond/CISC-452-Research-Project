@@ -38,7 +38,7 @@ class Dense_Toxic_Comment(object):
             model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
             return model
         print("--- Loading Model from {} ---".format(saved_model))
-        model = preproc.load_h5_model(saved_model)
+        model = preproc.load_model("dense_model")
         if model is None: # If the filepath is wrong or the model hasn't actually been defined earlier
             print("--- no model found, initializing from scrach ---")
             return self.define_model(embedding_matrix,saved_model=None)
@@ -56,7 +56,7 @@ class Dense_Toxic_Comment(object):
         # Evaluate the model on the test data using `evaluate`
         print('\n# Evaluate on test data')
         print(self.x_test.shape,self.y_test.shape)
-        results = self.model.evaluate(self.x_test, self.y_test, batch_size=128,verbose=1)
+        results = self.model.evaluate(self.x_test, self.y_test, batch_size=128,verbose=0)
         print('test loss, test acc:', results)
 
         # Generate predictions (probabilities -- the output of the last layer)
@@ -72,10 +72,11 @@ class Dense_Toxic_Comment(object):
         #     print("\t\t*targ vec -> {}".format(target))
         # print('predictions shape:', predictions.shape)
 
-    def save_model(self,file_path="saved_models/dense_toxic_comment.h5"):
+    def save_model(self,file_path="saved_models/dense_model.h5"):
         save_model(self.model, file_path)
         print("--- model saved to {} ---".format(file_path))
 
+# Testing saved model
 # if __name__ == "__main__":
 #     labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']    
 #     train_df, max_length = preproc.return_data('data/{}.csv'.format("balanced_train"))
@@ -88,9 +89,10 @@ class Dense_Toxic_Comment(object):
 #     x_test = pad_sequences(x_test, maxlen=max_length, padding='post')
 #     y_test = pd.read_csv("data/test_labels.csv")
 #     y_test = np.array(y_test[labels])
-#     saved_dense  = Dense_Toxic_Comment(x_test=x_test,y_test=y_test,saved_model="saved_models/dense_toxic_comment.h5")
+#     saved_dense = Dense_Toxic_Comment(x_test=x_test,y_test=y_test,saved_model="saved_models/dense_toxic_comment.h5")
 #     saved_dense.validate()
 
+# Training new model
 if __name__ == "__main__":
     train_df, max_length   = preproc.return_data('./data/{}.csv'.format("balanced_train"), num_to_take=40000)
     labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']    
