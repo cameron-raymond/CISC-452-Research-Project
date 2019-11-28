@@ -12,7 +12,7 @@ VOCAB_SIZE = 5000
 
 
 class Toxic_Comment_LSTM(object):
-    def __init__(self,x_train=None,y_train=None,x_test=None,y_test=None,embedding_matrix=None,max_length=None,saved_model=None):
+    def __init__(self,x_train,y_train,x_test=None,y_test=None,embedding_matrix=None,max_length=None,saved_model=None):
         super().__init__()
         self.max_length     = max_length
         self.x_train        = x_train
@@ -40,7 +40,7 @@ class Toxic_Comment_LSTM(object):
             model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
             return model
         print("--- Loading Model from {} ---".format(saved_model))
-        model = preproc.load_h5_model(saved_model)
+        model = preproc.load_model(saved_model)
         if model is None: # If the filepath is wrong or the model hasn't actually been defined earlier
             print("--- no model found, initializing from scrach ---")
             return self.define_model(embedding_matrix,saved_model=None)
@@ -74,27 +74,13 @@ class Toxic_Comment_LSTM(object):
             print("\t\t*targ vec -> {}".format(target))
         print('predictions shape:', predictions.shape)
 
-    def save_model(self,file_path="saved_models/dense_toxic_comment.h5"):
-        preproc.save_h5_model(file_path,self.model)
+    def save_model(self,file_path="saved_models/toxic_comment_LSTM.h5"):
+        preproc.save_model(file_path,self.model)
         print("--- model saved to {} ---".format(file_path))
 
-# if __name__ == "__main__":
-#     labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']    
-#     train_df, max_length = preproc.return_data('data/{}.csv'.format("cleaned_train"))
-#     t   = Tokenizer(filters = '"#$%&()*+-/:;<=>@[\]^_`{|}~')
-#     t.fit_on_texts(train_df['cleaned_text'])
-
-#     test_df, _ = preproc.return_data('data/{}.csv'.format("cleaned_test"))
-#     x_test = np.array(test_df['cleaned_text'])
-#     x_test = t.texts_to_sequences(x_test)
-#     x_test = pad_sequences(x_test, maxlen=max_length, padding='post')
-#     y_test = pd.read_csv("data/test_labels.csv")
-#     y_test = np.array(y_test[labels])
-#     saved_LSTM  = Toxic_Comment_LSTM(x_test=x_test,y_test=y_test,saved_model="saved_models/toxic_comment_LSTM.h5")
-#     saved_LSTM.validate()
 
 if __name__ == "__main__":
-    train_df, max_length   = preproc.return_data('./data/{}.csv'.format("balanced_train"), num_to_take=40000)
+    train_df, max_length   = preproc.return_data('./data/{}.csv'.format("balanced_train"))
     labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']    
     train  = np.array(train_df['cleaned_text'])
     t = Tokenizer(filters = '"#$%&()*+-/:;<=>@[\]^_`{|}~')
