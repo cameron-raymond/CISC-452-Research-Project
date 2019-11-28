@@ -1,5 +1,5 @@
 import numpy                    as np
-import preprocessing_helpers    as preproc
+import preprocessing.preprocessing_helpers    as preproc
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential

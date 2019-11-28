@@ -2,6 +2,7 @@ import numpy as np
 import os.path
 import csv
 import pandas as pd
+import sys
 import nltk
 import h5py # for saving models to file
 from nltk.tokenize import sent_tokenize, word_tokenize
@@ -17,6 +18,8 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Embedding
+
+ROOT = os.path.dirname(os.path.dirname(__file__))
 
 
 def text_clean(text):
@@ -134,7 +137,9 @@ def generate_glove_weights(embeddings, tokenizer,check_exists=False):
         embedding_vector = embeddings.get(word)
         if embedding_vector is not None:
             embedding_matrix[i] = embedding_vector
-    np.save('../data/embedding_matrix.npy', embedding_matrix)
+    print(ROOT)
+
+    np.save('{}/data/embedding_matrix.npy'.format(ROOT), embedding_matrix)
     print('--- Saved embedding matrix ---')
     return embedding_matrix
 
@@ -151,9 +156,9 @@ def load_model(name):
     -------
     model : tensorflow model | None
     """
-    file_path = '../saved_models/{}.h5'.format(name)
+    file_path = '{}/saved_models/{}.h5'.format(ROOT,name)
     if os.path.exists(file_path):
-        return load_model(file_path)
+        return tf_load(file_path)
     return None
 
 def save_model(name="model"):
@@ -165,7 +170,7 @@ def save_model(name="model"):
     name : str
         The name of the HDF5 model. Checks if the model exists within the saved_models directory.
     """
-    file_path = '../saved_models/{}.h5'.format(name)
+    file_path = '{}/saved_models/{}.h5'.format(ROOT,name)
     print("model => {}".format(file_path))
     
     if not os.path.exists(os.path.dirname(file_path)):
