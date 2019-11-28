@@ -18,6 +18,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Embedding
 
+PATH_TO_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 def text_clean(text):
     """
@@ -141,7 +142,23 @@ def load_model(name):
     """
     file_path = '../saved_models/{}.h5'.format(name)
     if os.path.exists(file_path):
-        return load_model(file_path)
+        return tf_load(file_path)
+    return None
+
+def load_h5_model(file_path):
+    """
+    Loads in a model saved with the HDF5 binary data format.
+    Parameters
+    ----------
+    file_path : str
+        The file_path of the HDF5 model. Checks if the model exists within the saved_models directory.
+    Returns
+    -------
+    model : tensorflow model | None
+    """
+    file_path = "{}/{}".format(PATH_TO_ROOT,file_path)
+    if os.path.exists(file_path):
+        return tf_load(file_path)
     return None
 
 def save_model(name="model"):
