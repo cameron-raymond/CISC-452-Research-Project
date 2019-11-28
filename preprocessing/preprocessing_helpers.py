@@ -22,12 +22,10 @@ from tensorflow.keras.layers import Dense, Flatten, Embedding
 def text_clean(text):
     """
     Gets and prints the spreadsheet's header columns
-
     Parameters
     ----------
     text : str
         Any sentence string
-
     Returns
     -------
     list
@@ -46,20 +44,16 @@ def text_clean(text):
 def return_data(path,num_to_take=None,clean=False,write=False):
     """
     Reads in a csv turns the csv's comments as a data frame along with the largest length 
-
     Parameters
     ----------
     path : str
         String path to the csv containing the training or test data
-
     num_to_take : None | int
         If num_to_take is None then return the entire data set, otherwise return the number of rows equal to num_to_take
-
     Returns
     -------
     text_df : pandas.DataFrame
         a pandas DataFrame containing the entire document with cleaned text and labels.
-
     max_len: int
         an integer representing the number of words in the longest comment in the cleaned_text column
     """
@@ -76,7 +70,6 @@ def return_data(path,num_to_take=None,clean=False,write=False):
 def clean_all_data(path):
     """
     takes in a csv file and cleans all the comment_text column. This is only used to clean the train.csv and test.csv
-
     Parameters
     ----------
     path : str
@@ -86,19 +79,17 @@ def clean_all_data(path):
     text_df = pd.read_csv(path)
     print("--- cleaning ---")
     text_df['cleaned_text'] = text_df['comment_text'].apply(text_clean)
-    text_df.to_csv('../data/cleaned_text.csv', encoding='utf-8')
+    text_df.to_csv('./data/cleaned_text.csv', encoding='utf-8')
     print("--- Cleaned all data! ---")
 
 
 def load_glove(path):
     """
     Loads in the glove embedding from a text file
-
     Parameters
     ----------
     path : str
         String path to the txt file containing the glove data
-
     Returns
     -------
     embeddings_index : dict
@@ -117,16 +108,15 @@ def load_glove(path):
 def generate_glove_weights(embeddings, tokenizer,check_exists=False):
     """
     generates a weight matrix. It is then saved as a binary numpy file that can be loaded
-
     Generates
     ---------
     embedding_matrix.npy : np.array
         A numpy array of dimensions vocab_size x vector_representation_dim. Each row represents a word that appears
         during in a document and the vectors can be thought of as the weights being used in training.
     """
-    if os.path.exists("../data/embedding_matrix.npy") and check_exists:
+    if os.path.exists("./data/embedding_matrix.npy") and check_exists:
         print("--- loading GloVe weights ---")
-        return np.load("../data/embedding_matrix.npy")
+        return np.load("./data/embedding_matrix.npy")
     print("--- generating GloVe weights ---")
     VOCAB_SIZE = len(tokenizer.word_index) + 1
     embedding_matrix = np.zeros((VOCAB_SIZE,100))
@@ -134,19 +124,17 @@ def generate_glove_weights(embeddings, tokenizer,check_exists=False):
         embedding_vector = embeddings.get(word)
         if embedding_vector is not None:
             embedding_matrix[i] = embedding_vector
-    np.save('../data/embedding_matrix.npy', embedding_matrix)
+    np.save('./data/embedding_matrix.npy', embedding_matrix)
     print('--- Saved embedding matrix ---')
     return embedding_matrix
 
 def load_model(name):
     """
     Loads in a model saved with the HDF5 binary data format.
-
     Parameters
     ----------
     name : str
         The name of the HDF5 model. Checks if the model exists within the saved_models directory.
-
     Returns
     -------
     model : tensorflow model | None
@@ -159,7 +147,6 @@ def load_model(name):
 def save_model(name="model"):
     """
     Saves in a model to the HDF5 binary data format.
-
     Parameters
     ----------
     name : str
@@ -177,4 +164,3 @@ def save_model(name="model"):
                 raise
     else:
         self.to_dense.save(file_path)
-

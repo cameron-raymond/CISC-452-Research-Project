@@ -29,11 +29,13 @@ class Toxic_Comment_LSTM(object):
             model = Sequential()
             embedding_layer = Embedding(VOCAB_SIZE, 100, weights=[embedding_matrix], input_length=max_length, trainable=False)
             model.add(embedding_layer)
-            model.add(LSTM(60, return_sequences=True,name='lstm_layer'))
-            model.add(GlobalMaxPool1D())
-            model.add(Dropout(0.1))
-            model.add(Dense(50, activation="relu"))
-            model.add(Dropout(0.1))
+            model.add(Flatten())
+            # model.add(LSTM(60, return_sequences=True,name='lstm_layer'))
+            # model.add(GlobalMaxPool1D())
+            model.add(Dense(32, activation="relu"))
+            model.add(Dropout(0.2))
+            model.add(Dense(16, activation="relu"))
+            model.add(Dropout(0.2))
             model.add(Dense(num_labels, activation="sigmoid"))
             model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
             return model
@@ -47,7 +49,7 @@ class Toxic_Comment_LSTM(object):
     def train(self,x_train=None,y_train=None):
         x_train = self.x_train if x_train is None else x_train
         y_train = self.y_train if y_train is None else y_train
-        epochs = 10
+        epochs = 5
         batch_size = 64
         callback = EarlyStopping(monitor='val_loss', patience=3, min_delta=0.0001,verbose=1)
         history = self.model.fit(x_train,y_train, epochs=epochs, batch_size=batch_size,validation_split=0.1,callbacks=[callback],verbose=1)
@@ -72,29 +74,27 @@ class Toxic_Comment_LSTM(object):
             print("\t\t*targ vec -> {}".format(target))
         print('predictions shape:', predictions.shape)
 
-    def save_model(self,file_path="saved_models/toxic_comment_LSTM.h5"):
+    def save_model(self,file_path="saved_models/dense_toxic_comment.h5"):
         preproc.save_h5_model(file_path,self.model)
         print("--- model saved to {} ---".format(file_path))
 
-if __name__ == "__main__":
-    labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']    
-    train_df, max_length = preproc.return_data('data/{}.csv'.format("cleaned_train"))
-    t   = Tokenizer(filters = '"#$%&()*+-/:;<=>@[\]^_`{|}~')
-    t.fit_on_texts(train_df['cleaned_text'])
+# if __name__ == "__main__":
+#     labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']    
+#     train_df, max_length = preproc.return_data('data/{}.csv'.format("cleaned_train"))
+#     t   = Tokenizer(filters = '"#$%&()*+-/:;<=>@[\]^_`{|}~')
+#     t.fit_on_texts(train_df['cleaned_text'])
 
-    test_df, _ = preproc.return_data('data/{}.csv'.format("cleaned_test"))
-    x_test = np.array(test_df['cleaned_text'])
-    x_test = t.texts_to_sequences(x_test)
-    x_test = pad_sequences(x_test, maxlen=max_length, padding='post')
-    y_test = pd.read_csv("data/test_labels.csv")
-    y_test = np.array(y_test[labels])
-    saved_LSTM  = Toxic_Comment_LSTM(x_test=x_test,y_test=y_test,saved_model="saved_models/toxic_comment_LSTM.h5")
-    saved_LSTM.validate()
-
-
+#     test_df, _ = preproc.return_data('data/{}.csv'.format("cleaned_test"))
+#     x_test = np.array(test_df['cleaned_text'])
+#     x_test = t.texts_to_sequences(x_test)
+#     x_test = pad_sequences(x_test, maxlen=max_length, padding='post')
+#     y_test = pd.read_csv("data/test_labels.csv")
+#     y_test = np.array(y_test[labels])
+#     saved_LSTM  = Toxic_Comment_LSTM(x_test=x_test,y_test=y_test,saved_model="saved_models/toxic_comment_LSTM.h5")
+#     saved_LSTM.validate()
 
 if __name__ == "__main__":
-    train_df, max_length   = preproc.return_data('./data/{}.csv'.format("cleaned_train"))
+    train_df, max_length   = preproc.return_data('./data/{}.csv'.format("balanced_train"), num_to_take=40000)
     labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']    
     train  = np.array(train_df['cleaned_text'])
     t = Tokenizer(filters = '"#$%&()*+-/:;<=>@[\]^_`{|}~')
