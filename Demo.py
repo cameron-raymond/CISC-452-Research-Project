@@ -54,7 +54,7 @@ if __name__ == "__main__":
     x_test = t.texts_to_sequences(test_df)
     x_test = pad_sequences(x_test, maxlen=max_length, padding='post')
     print("--- import test labels ---")
-    y_test = pd.read_csv('./data/{}.csv'.format("test_labels"))
+    y_test = pd.read_csv('./data/{}.csv'.format("cleaned_test_labels"))
     y_test = y_test[labels].to_numpy()
     print("--- loading in LSTM ---")
     LSTM = load_model(model_str.format("toxic_comment_LSTM"))

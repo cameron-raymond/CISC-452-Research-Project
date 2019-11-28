@@ -7,6 +7,7 @@ import h5py # for saving models to file
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem import WordNetLemmatizer 
 from nltk.corpus import stopwords
+from tensorflow.keras.models import load_model as tf_load
 # nltk.download('wordnet')
 lemmatizer = WordNetLemmatizer()
 
@@ -137,7 +138,7 @@ def generate_glove_weights(embeddings, tokenizer,check_exists=False):
     print('--- Saved embedding matrix ---')
     return embedding_matrix
 
-def load_model(self,name):
+def load_model(name):
     """
     Loads in a model saved with the HDF5 binary data format.
 
@@ -155,7 +156,7 @@ def load_model(self,name):
         return load_model(file_path)
     return None
 
-def save_model(self,name="model"):
+def save_model(name="model"):
     """
     Saves in a model to the HDF5 binary data format.
 
