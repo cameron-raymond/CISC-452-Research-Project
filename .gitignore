@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 # data
+tempEnv/
 data/
 # saved models
 glove/
