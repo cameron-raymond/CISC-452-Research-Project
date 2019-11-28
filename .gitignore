@@ -8,7 +8,7 @@ tempEnv/
 data/
 # saved models
 glove/
-#saved_models/
+saved_models/
 # C extensions
 *.so
 
