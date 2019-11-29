@@ -15,11 +15,12 @@ def validate(model,x_test,y_test,numToValidate=None):
         if numToValidate and numToValidate <= x_test.shape[0]-1:
             x_test = x_test[:numToValidate]
             y_test = y_test[:numToValidate]
-        print("\n\n")
         print('--- Evaluate on test data ---')
         print("\t* Size: {}, num labels: {}".format(x_test.shape,y_test.shape))
         results = model.evaluate(x_test, y_test, batch_size=128,verbose=0)
-        print('\t* test loss, test acc:', results)
+        print('\t* test loss: {:.4f}, test acc: {:.4f}'.format(*results))
+        print("\n")
+
         
 def return_models(directory):
     models = []
@@ -65,3 +66,5 @@ if __name__ == "__main__":
     for model_name, model in models:
         print("--- Validating {} ---".format(model_name))
         validate(model,x_test,y_test,numToValidate)
+    end = time.time()
+    print("Total time for validation (seconds): {:.2f}".format(end-start))

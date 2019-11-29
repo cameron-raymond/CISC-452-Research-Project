@@ -12,6 +12,12 @@ VOCAB_SIZE = 5000
 
 
 class Toxic_Comment_LSTM(object):
+    """
+        Author: Cameron Raymond
+
+        Description: This was our first attempt at using an LSTM to classify toxic comments. 
+        After more experiminting we developed LSTM_deep, which achieved better performance.
+    """
     def __init__(self,x_train,y_train,x_test=None,y_test=None,embedding_matrix=None,max_length=None,saved_model=None):
         super().__init__()
         self.max_length     = max_length
@@ -29,9 +35,8 @@ class Toxic_Comment_LSTM(object):
             model = Sequential()
             embedding_layer = Embedding(VOCAB_SIZE, 100, weights=[embedding_matrix], input_length=max_length, trainable=False)
             model.add(embedding_layer)
-            model.add(Flatten())
-            # model.add(LSTM(60, return_sequences=True,name='lstm_layer'))
-            # model.add(GlobalMaxPool1D())
+            model.add(LSTM(60, return_sequences=True,name='lstm_layer'))
+            model.add(GlobalMaxPool1D())
             model.add(Dense(32, activation="relu"))
             model.add(Dropout(0.2))
             model.add(Dense(16, activation="relu"))
@@ -100,5 +105,5 @@ if __name__ == "__main__":
     print(x_test.shape)
     toxic_Comment_LSTM = Toxic_Comment_LSTM(x_train,y_train,x_test,y_test,embedding_matrix,max_length)
     toxic_Comment_LSTM.train()
-    toxic_Comment_LSTM.save_model()
+    # toxic_Comment_LSTM.save_model()
     toxic_Comment_LSTM.validate()

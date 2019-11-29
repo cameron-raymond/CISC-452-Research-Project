@@ -12,6 +12,12 @@ VOCAB_SIZE = 5000
 
 
 class Toxic_Comment_LSTM(object):
+    """
+        Author: Gabby Bermudez
+
+        Description: This was our first attempt at using an LSTM to classify toxic comments. 
+        After more experiminting we developed LSTM_deep, which achieved better performance.
+    """
     def __init__(self,x_train,y_train,x_test=None,y_test=None,embedding_matrix=None,max_length=None,saved_model=None):
         super().__init__()
         self.max_length     = max_length

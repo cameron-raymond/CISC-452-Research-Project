@@ -9,6 +9,11 @@ from tensorflow.keras.layers import Dense, LSTM, Flatten, Embedding, SpatialDrop
 from tensorflow.keras.models import load_model, save_model
 
 class Dense_Toxic_Comment(object):
+    """
+        Author: Leonard Zhao
+
+        Description: A baseline, feed forward neural network for classifying abusive comments.
+    """
     def __init__(self,x_train=None,y_train=None,x_test=None,y_test=None,embedding_matrix=None,max_length=None,saved_model=None):
         super().__init__()
         self.max_length     = max_length
