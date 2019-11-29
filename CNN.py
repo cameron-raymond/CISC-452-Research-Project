@@ -62,9 +62,9 @@ if __name__ == "__main__":
     model = Sequential()
     e = Embedding(VOCAB_SIZE, 100, weights=[embedding_matrix], input_length=max_length, trainable=False)
     model.add(e)
-    model.add(Conv1D(100, 30, activation='relu'))
+    model.add(Conv1D(100, 5, activation='relu'))
     #model.add(Dropout(0.1))
-    #model.add(Conv1D(50,5, activation='relu'))
+    model.add(Conv1D(50,5, activation='relu'))
     #model.add(Dropout(0.1))
     model.add(GlobalMaxPooling1D())
     model.add(Dense(6, activation='sigmoid'))
@@ -88,18 +88,4 @@ if __name__ == "__main__":
     print('Precision:',precision)
     print('Recall:',recall)
     
-    # shuffle_idx = np.random.choice(np.arange(x_test.shape[0]), 50, replace=False)
-    # x_sample, y_sample = x_test[shuffle_idx], y_test[shuffle_idx]
-    # print('\n#Generate predictions for {} samples'.format(x_sample.shape[0]))
-    # predictions = model.predict(x_sample)
-    # for i,(prediction, target) in enumerate(zip(predictions,y_sample)):
-    #     print("\t* prediction {} -> {}".format(i,prediction))
-    #     print("\t\t*targ vec -> {}".format(target))
-    # print('predictions shape:', predictions.shape)
-
-    #predictions = model.predict(test_data)
-    
-    #np.savetxt('./test_predictions.txt', predictions)
-
-
-    #model.
+  
