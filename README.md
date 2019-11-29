@@ -4,9 +4,9 @@ Toxic Comment Classification using LSTM and CNNs
 
 * **Cameron Raymond** - *Computer Science, Queen's University*
 * **Gabby Bermudez** - *Computer Science, Queen's University*
-* **Kenny Moore** - *Computer Science, Queen's University*
+* **Kenya Moore** - *Computer Science, Queen's University*
 * **Kieren Underwood** - *Computer Science, The University of Western Australia*
-* **Leonard Zhao** - *Cognitive Computing, Queen's University*
+* **Leonard Zhao** - *Biomedical Computing, Queen's University*
 
 ** **
 
