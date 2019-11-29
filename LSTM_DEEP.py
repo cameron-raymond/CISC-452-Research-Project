@@ -5,7 +5,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.layers import Dense, LSTM, Flatten, Embedding, SpatialDropout1D,GlobalMaxPool1D, Dropout
+from tensorflow.keras.layers import Dense, LSTM, Flatten, Embedding, SpatialDropout1D,GlobalMaxPool1D, Dropout, Bidirectional
 from tensorflow.keras.models import load_model
 
 VOCAB_SIZE = 5000
@@ -97,5 +97,5 @@ if __name__ == "__main__":
     print(x_test.shape)
     toxic_Comment_LSTM = Toxic_Comment_LSTM(x_train,y_train,x_test,y_test,embedding_matrix,max_length)
     toxic_Comment_LSTM.train()
-    toxic_Comment_LSTM.save_model()
+    toxic_Comment_LSTM.save_model('saved_models/deep_LSTM.h5')
     toxic_Comment_LSTM.validate()
