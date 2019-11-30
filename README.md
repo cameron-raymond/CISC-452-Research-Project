@@ -23,5 +23,5 @@ Toxic Comment Classification using LSTM and CNNs
 
 * **Valiate All Models** - `python3 Demo.py`
 * **Train Dense Neural Network** -  `python3 Dense.py`
-* **Train LSTM** - `python3 LSTM.py`
+* **Train LSTM** - `python3 LSTM_DEEP.py` to run a more primitive LSTM run `python3 LSTM.py`
 * **Train CNN** - `python3 CNN.py`
