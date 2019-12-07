@@ -35,7 +35,13 @@ def return_models(directory):
             print("Only keep h5 models in the saved models directory")
     return models
 
-
+def create_confusion_matrix(model,x_test,y_test,labels,numToValidate=None):
+    # Evaluate the model on the test data using `evaluate`
+    if numToValidate and numToValidate <= x_test.shape[0]-1:
+        x_test = x_test[:numToValidate]
+        y_test = y_test[:numToValidate]
+    y_pred = model.predict(x_test).round()
+    preproc.confusion_matrix(y_test,y_pred,labels)
 
 if __name__ == "__main__":
     print("--- starting demo ---")

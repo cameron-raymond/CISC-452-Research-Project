@@ -146,6 +146,26 @@ def load_model(name):
         return tf_load(file_path)
     return None
 
+def confusion_matrix(y_true,y_pred,labels):
+    conf_mat_dict={}
+
+    for label_col in range(len(labels)):
+        y_true_label = y_true[:, label_col]
+        y_pred_label = y_pred[:, label_col]
+        conf_mat_dict[labels[label_col]] = confusion_matrix(y_pred=y_pred_label, y_true=y_true_label)
+
+
+    for label, matrix in conf_mat_dict.items():
+        print("Confusion matrix for label {}:".format(label))
+        print(matrix)
+    return conf_mat_dict
+
+def to_binary(data,labels):
+    print("--- converting multi label problem to binary classification --- ")
+    data["any_toxicity"] = data[labels].apply(lambda row: (row == 1).any() , axis=1)*1 # The .any() checks to see if any of the labels are present, *1 casts it to an int (false == 0, true == 1)
+    binary_data = data.drop(labels,axis = 1)
+    return binary_data
+    
 def load_h5_model(file_path):
     """
     Loads in a model saved with the HDF5 binary data format.
